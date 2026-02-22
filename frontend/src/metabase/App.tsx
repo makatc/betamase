@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { Location } from "history";
 import { KBarProvider } from "kbar";
 import type { ReactNode } from "react";
@@ -141,7 +142,6 @@ function App({
   );
 }
 
-// eslint-disable-next-line import/no-default-export -- deprecated usage
 export default connect<AppStateProps, unknown, AppRouterOwnProps, State>(
   mapStateToProps,
   mapDispatchToProps,

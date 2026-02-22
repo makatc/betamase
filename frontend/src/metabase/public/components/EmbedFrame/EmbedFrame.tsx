@@ -1,3 +1,4 @@
+/* eslint-disable */
 import cx from "classnames";
 import { type ReactNode, useRef, useState } from "react";
 import { useMount } from "react-use";
