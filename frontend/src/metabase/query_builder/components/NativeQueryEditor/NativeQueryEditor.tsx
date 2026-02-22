@@ -30,7 +30,7 @@ import type {
   ParameterId,
 } from "metabase-types/api";
 
-import { AIQueryButton } from "../../../lw/ai/AIQueryButton";
+import { AIQueryButton } from "../../../../lw/ai/AIQueryButton";
 
 import {
   CodeMirrorEditor,
