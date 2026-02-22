@@ -30,6 +30,8 @@ import type {
   ParameterId,
 } from "metabase-types/api";
 
+import { AIQueryButton } from "../../../lw/ai/AIQueryButton";
+
 import {
   CodeMirrorEditor,
   type CodeMirrorEditorProps,
@@ -392,6 +394,14 @@ export const NativeQueryEditor = forwardRef<
                 )}
                 <Flex gap="sm">
                   {extraButton}
+                  {!readOnly && (
+                    <AIQueryButton
+                      onQueryGenerated={(sql) => {
+                        handleChange(sql);
+                        focusEditor();
+                      }}
+                    />
+                  )}
                   {hasRunButton && !readOnly && (
                     <NativeQueryEditorRunButton
                       cancelQuery={cancelQuery}
