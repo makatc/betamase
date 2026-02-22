@@ -1,0 +1,8 @@
+# Ejecutar Prewarming de Dashboards todos los dias a las 05:00 AM
+0 5 * * * cd /home/makatc/PROYECTOS/betamase/automation/cache && /usr/bin/python3 prewarm_dashboards.py
+
+# Analizar Slow Queries a las 02:00 AM (Las views se materializan en PG a las 03:00)
+0 2 * * * cd /home/makatc/PROYECTOS/betamase/automation/cache && /usr/bin/python3 analyze_slow_queries.py
+
+# Alertas Predictivas Inteligentes (Corren cada 12 horas - 08:00 y 20:00)
+0 8,20 * * * cd /home/makatc/PROYECTOS/betamase/automation/ai/alerts && /usr/bin/python3 ai_alert_engine.py >> /var/log/ai_alerts.log 2>&1
