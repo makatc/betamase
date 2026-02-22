@@ -38,6 +38,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import { useTokenRefresh } from "./api/utils/use-token-refresh";
 import { NewModals } from "./new/components/NewModals/NewModals";
 import { Palette } from "./palette/components/Palette";
+import { ChatWidget } from "../lw/ai/ChatWidget";
 
 const getErrorComponent = ({ status, data, context }: AppErrorDescriptor) => {
   if (status === 403 || data?.error_code === "unauthorized") {
@@ -133,6 +134,7 @@ function App({
             </AppContentContainer>
           </AppContainer>
           <Palette />
+          <ChatWidget />
         </KBarProvider>
       </ScrollToTop>
     </ErrorBoundary>

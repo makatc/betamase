@@ -109,9 +109,7 @@ export const EmbedFrame = ({
   contentClassName,
 }: EmbedFrameProps) => {
   useGlobalTheme(theme);
-  const hasEmbedBranding = useSelector(
-    (state) => !getSetting(state, "hide-embed-branding?"),
-  );
+  const hasEmbedBranding = false; // Forced false by Pro-OSS Fork
 
   const isPublicDashboard = Boolean(
     dashboard && getDashboardType(dashboard.id) === "public",

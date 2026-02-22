@@ -44,7 +44,9 @@ export function AppBarLogo({
       disabled={!isNavBarEnabled}
       data-testid="main-logo-link"
     >
-      <LogoIcon height={32} />
+      <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '18px', color: 'var(--mb-color-brand)' }}>
+        <LogoIcon height={24} /> <span style={{ marginLeft: 8 }}>MyDataApp</span>
+      </div>
     </LogoLink>
   );
 }
