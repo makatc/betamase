@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  metabase:
+    environment:
+      MB_SITE_URL: https://metabase.tudominio.com
+    restart: always
+
+  nginx:
+    profiles:
+      - active
+    ports:
+      - "80:80"
+      - "443:443"
