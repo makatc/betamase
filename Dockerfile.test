@@ -1,0 +1,14 @@
+FROM node:22-bullseye
+WORKDIR /app
+RUN apt-get update && apt-get install -y wget apt-transport-https gpg curl git python3 python3-pip python-is-python3 build-essential \
+    && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null \
+    && echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list \
+    && apt-get update && apt-get install -y temurin-21-jdk \
+    && curl -O https://download.clojure.org/install/linux-install-1.12.0.1488.sh \
+    && chmod +x linux-install-1.12.0.1488.sh && ./linux-install-1.12.0.1488.sh
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    ln -s /root/.local/bin/uv /usr/local/bin/uv && \
+    ln -s /root/.local/bin/uvx /usr/local/bin/uvx
+ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
+COPY . .
+RUN INTERACTIVE=false CI=true MB_EDITION=oss bin/build.sh '{:steps [:version]}'

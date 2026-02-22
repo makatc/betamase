@@ -17,8 +17,17 @@ RUN git config --global --add safe.directory /home/node
 RUN npm install -g bun
 RUN bun install --frozen-lockfile
 
-# Modificación de Branding y Compilación Final
-RUN INTERACTIVE=false CI=true MB_EDITION=oss bin/build.sh > clojure_build.log 2>&1 || (tail -n 250 clojure_build.log && exit 1)
+# Increase memory for build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV JAVA_OPTS="-Xmx4g"
+
+# Explicitly build frontend parts with logs
+RUN bun install --frozen-lockfile
+RUN MB_EDITION=oss bun run build-release:cljs
+RUN ls -la target/cljs_release/metabase.parameters.shared.js || (echo "CLJS build failed to produce output" && exit 1)
+
+# Build the rest
+RUN INTERACTIVE=false CI=true MB_EDITION=oss bin/build.sh > clojure_build.log 2>&1 || (tail -n 500 clojure_build.log && exit 1)
 
 # ---- RUNNER ----
 FROM eclipse-temurin:21-jre-alpine AS runner
