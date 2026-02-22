@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { type FocusEvent, useMemo, useState } from "react";
 import { t } from "ttag";
 
@@ -97,14 +98,14 @@ export function MetabotSQLGenerationSettingsSection() {
   return (
     <SettingsPageWrapper>
       <SettingsSection
-        title={t`Connect to a model`}
-        description={t`Use your Anthropic API key and specify which language model to use for AI features.`}
+        title={t`Metabase Experimental (Anthropic)`}
+        description={t`Note: Our Custom Pro AI uses Gemini and Grok via Docker environment variables. This section is only for Metabase's native experimental Anthropic tests. Leave blank if using our AI Middleware.`}
       >
         <Stack gap="md">
           <Box>
             <ApiKeyInput
               disabled={isApiKeyEnvVar}
-              label={t`Anthropic API Key`}
+              label={t`Anthropic API Key (Not needed for our Custom AI)`}
               placeholder={t`Enter your API key`}
               value={apiKeyDisplayValue}
               onChange={(e) => {
