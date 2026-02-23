@@ -10,6 +10,45 @@ Los feature flags se controlan via variables de entorno `LW_FEATURE_*` leídas e
 
 ---
 
+## ⛔ DECISIÓN IMPORTANTE: SIN DOCKER
+
+> **El usuario NO quiere usar Docker.** Todo debe correr directamente en el sistema local.
+
+### Contexto de por qué se abandonó Docker
+
+El prompt original pedía Docker + Docker Compose. Durante la implementación se generaron todos los archivos (`docker-compose.yml`, `Dockerfile.custom`, etc.) pero se encontraron los siguientes problemas:
+
+1. **Portainer no podía leer el repo**: Al intentar desplegar vía Portainer (interfaz web de Docker), arrojaba `open /data/compose/N/docker-compose.yml: no such file or directory`. El repo tiene múltiples `docker-compose.yml` en subdirectorios (los originales de Metabase para sus propios tests E2E), lo que confundía a Portainer al clonar.
+
+2. **La imagen GHCR no contenía nuestros cambios**: Para evitar una compilación de 30+ minutos en el VPS (4GB de RAM), se configuró GitHub Actions para compilar y publicar la imagen en GHCR (`ghcr.io/makatc/betamase:latest`). Sin embargo, esta imagen resultó ser la del **Metabase original sin modificaciones**, no la nuestra.
+
+3. **Los feature flags no se activaban**: Aunque el contenedor corría, las variables de entorno `LW_FEATURE_*` no estaban declaradas en el `docker-compose.yml` del servidor, por lo que los botones AI nunca aparecían en la UI.
+
+4. **Conflicto de puertos**: Portainer ya usaba el puerto `8000`, por lo que el AI Middleware (FastAPI) no podía exponerse al exterior.
+
+5. **Compilación de Metabase tarda 20-30 min**: El `Dockerfile.custom` necesitaba compilar todo el JAR de Clojure + assets de React desde cero. En un VPS de 4GB esto era inviable en tiempo real.
+
+### Decisión final
+
+**Se eliminaron todos los archivos Docker del repo** (`Dockerfile.custom`, `docker-compose.yml`, `automation/ai/Dockerfile`, carpeta `docker/`) para evitar confusión.
+
+**El stack corre localmente** con procesos nativos directos:
+```bash
+# Terminal 1 — Backend Metabase
+export LW_FEATURE_AI_SQL_GENERATION=true
+export LW_FEATURE_AI_CHAT_WIDGET=true
+export LW_FEATURE_AI_INSIGHTS=true
+eval "$(mise activate bash)"
+clojure -M:dev:drivers:drivers-dev:ee:ee-dev:dev-start --hot
+
+# Terminal 2 — Frontend Metabase (hot reload)
+bun run build-hot
+
+# Terminal 3 — FastAPI AI Middleware
+export GEMINI_API_KEY="tu-clave-de-aistudio.google.com"
+cd automation/ai/api && uvicorn main:app --port 8001 --reload
+```
+
 ## ✅ COMPLETADO
 
 ### Seguridad (PostgreSQL)
