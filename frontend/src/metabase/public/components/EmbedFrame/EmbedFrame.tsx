@@ -1,4 +1,3 @@
-/* eslint-disable */
 import cx from "classnames";
 import { type ReactNode, useRef, useState } from "react";
 import { useMount } from "react-use";
@@ -159,11 +158,11 @@ export const EmbedFrame = ({
 
   const valuePopulatedParameters = parameters
     ? getValuePopulatedParameters({
-        parameters,
-        values: _.isEmpty(draftParameterValues)
-          ? parameterValues
-          : draftParameterValues,
-      })
+      parameters,
+      values: _.isEmpty(draftParameterValues)
+        ? parameterValues
+        : draftParameterValues,
+    })
     : [];
 
   useSyncUrlParameters({

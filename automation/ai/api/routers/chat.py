@@ -1,63 +1,75 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import os
-from langchain.memory import ConversationBufferWindowMemory
-from langchain.chat_models import ChatOpenAI
-# Langchain can interface with Grok APIs since they mimic OpenAI API format.
-# Or we can fallback to Gemini if needed.
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from google import genai as google_genai
 
 router = APIRouter()
 
 GROK_API_KEY = os.getenv("GROK_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 AI_CHAT_MODEL = os.getenv("AI_CHAT_MODEL", "grok-beta")
+AI_FAST_MODEL = os.getenv("AI_FAST_MODEL", "gemini-2.0-flash")
 
-# In-memory dictionary to hold user sessions (For dev. Use Redis for PROD)
-user_memory = {}
+# In-memory dict to hold conversation history per user (For dev. Use Redis for PROD)
+user_history: dict[str, InMemoryChatMessageHistory] = {}
 
 class ChatMsg(BaseModel):
     message: str
     user_id: str = "default_user"
 
+SYSTEM_PROMPT = "You are an intelligent Data Assistant embedded in Metabase. Answer questions about data directly, logically, and concisely."
+
 @router.post("/chat")
 def chat_with_data(data: ChatMsg):
-    if not GROK_API_KEY:
-         raise HTTPException(status_code=500, detail="GROK_API_KEY not configured. To test locally, you can set it as OPENAI API format or use Gemini.")
+    # --- Fallback strategy: try Grok first, then Gemini ---
+    if not GROK_API_KEY and not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail="No AI keys configured. Set GROK_API_KEY or GEMINI_API_KEY.")
 
-    # Init Langchain Chat Model connected to xAI Grok Endpoint
-    llm = ChatOpenAI(
-        openai_api_key=GROK_API_KEY,
-        openai_api_base="https://api.x.ai/v1",
-        model_name=AI_CHAT_MODEL
-    )
+    # Init or retrieve conversation history
+    if data.user_id not in user_history:
+        user_history[data.user_id] = InMemoryChatMessageHistory()
+    history = user_history[data.user_id]
 
-    # Init or Retrieve Memory (Keeps last 5 conversational turns)
-    if data.user_id not in user_memory:
-        user_memory[data.user_id] = ConversationBufferWindowMemory(k=5)
+    # --- Grok path (primary) ---
+    if GROK_API_KEY:
+        try:
+            llm = ChatOpenAI(
+                api_key=GROK_API_KEY,
+                base_url="https://api.x.ai/v1",
+                model=AI_CHAT_MODEL
+            )
+            messages = [SystemMessage(content=SYSTEM_PROMPT)] + history.messages + [HumanMessage(content=data.message)]
+            if len(messages) > 11:
+                messages = [messages[0]] + messages[-10:]
+            response = llm.invoke(messages)
+            reply = response.content.strip()
+            history.add_user_message(data.message)
+            history.add_ai_message(reply)
+            return {"reply": reply, "provider": "grok", "sql_used": None}
+        except Exception as e:
+            print(f"Grok failed, trying Gemini fallback: {e}")
 
-    memory = user_memory[data.user_id]
+    # --- Gemini fallback (when Grok unavailable or fails) ---
+    if GEMINI_API_KEY:
+        try:
+            client = google_genai.Client(api_key=GEMINI_API_KEY)
 
-    # Retrieve previous conversation context
-    history = memory.load_memory_variables({})["history"]
+            # Build a simple conversation string for Gemini (no native history support in basic API)
+            history_text = ""
+            for msg in history.messages[-6:]:  # last 3 turns
+                role = "User" if isinstance(msg, HumanMessage) else "Assistant"
+                history_text += f"{role}: {msg.content}\n"
 
-    prompt = f"""You are Grok, an advanced and intelligent Data Assistant embedded in Metabase.
-    You answer questions directly, logically, with a hint of rebellious wit or direct truth.
+            prompt = f"{SYSTEM_PROMPT}\n\n{history_text}User: {data.message}\nAssistant:"
+            response = client.models.generate_content(model=AI_FAST_MODEL, contents=prompt)
+            reply = response.text.strip()
+            history.add_user_message(data.message)
+            history.add_ai_message(reply)
+            return {"reply": reply, "provider": "gemini-fallback", "sql_used": None}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Gemini fallback error: {str(e)[:200]}")
 
-    Conversation History:
-    {history}
-
-    User: {data.message}
-    Grok:"""
-
-    try:
-        from langchain.schema import HumanMessage
-        response = llm([HumanMessage(content=prompt)])
-        reply = response.content.strip()
-
-        # Save interaction
-        memory.save_context({"input": data.message}, {"output": reply})
-
-        return {"reply": reply, "sql_used": None}
-
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Error communicating with Chat API (Grok).")
+    raise HTTPException(status_code=500, detail="No AI provider available.")

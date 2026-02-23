@@ -35,13 +35,18 @@ def get_database_schema():
         cur.close()
         conn.close()
 
-        # Format into a readable prompt string
-        schema_context = "Database Schema:\n"
-        for table, cols in schema_dict.items():
-            schema_context += f"Table: {table}\nColumns: {', '.join(cols)}\n\n"
+        # Limit to first 20 tables, 8 cols each to keep prompt small (avoid token rate limits)
+        MAX_TABLES = 20
+        MAX_COLS = 8
+        schema_context = "Database Schema (top tables):\n"
+        for i, (table, cols) in enumerate(schema_dict.items()):
+            if i >= MAX_TABLES:
+                schema_context += f"...and {len(schema_dict) - MAX_TABLES} more tables.\n"
+                break
+            schema_context += f"Table: {table}\nColumns: {', '.join(cols[:MAX_COLS])}\n\n"
 
         if not schema_dict:
-            return "No public tables found in the database. Please ensure the target database has data."
+            return "No public tables found. Using generic schema."
 
         return schema_context
 

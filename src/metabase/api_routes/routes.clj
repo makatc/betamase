@@ -5,7 +5,6 @@
    [metabase.activity-feed.api]
    [metabase.analytics.api]
    [metabase.api-keys.api]
-   [metabase.api.ai]
    [metabase.api.docs]
    [metabase.api.macros :as api.macros]
    [metabase.api.open-api :as open-api]
@@ -146,7 +145,6 @@
 (def ^:private route-map
   {"/action"               (+auth 'metabase.actions-rest.api)
    "/activity"             (+auth 'metabase.activity-feed.api)
-   "/ai"                   (+auth metabase.api.ai/routes)
    "/alert"                (+auth metabase.pulse.api/alert-routes)
    "/analytics"            (+auth 'metabase.analytics.api)
    "/api-key"              (+auth 'metabase.api-keys.api)

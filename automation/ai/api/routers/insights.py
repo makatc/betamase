@@ -1,15 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import google.generativeai as genai
+from google import genai
 import os
 
 router = APIRouter()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-AI_FAST_MODEL = os.getenv("AI_FAST_MODEL", "gemini-1.5-flash")
+AI_FAST_MODEL = os.getenv("AI_FAST_MODEL", "gemini-2.0-flash")
 
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 class InsightData(BaseModel):
     dashboard_id: int
@@ -17,7 +16,7 @@ class InsightData(BaseModel):
 
 @router.post("/insights")
 def get_insights(data: InsightData):
-    if not GEMINI_API_KEY:
+    if not GEMINI_API_KEY or not client:
          raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured on server.")
 
     prompt = f"""
@@ -31,9 +30,10 @@ Data JSON representation:
 Insight:
 """
     try:
-        model = genai.GenerativeModel(AI_FAST_MODEL)
-        response = model.generate_content(prompt)
-
+        response = client.models.generate_content(
+            model=AI_FAST_MODEL,
+            contents=prompt
+        )
         return {"text": response.text.strip(), "confidence": 0.9}
 
     except Exception as e:

@@ -30,8 +30,6 @@ import type {
   ParameterId,
 } from "metabase-types/api";
 
-import { AIQueryButton } from "../../../../lw/ai/AIQueryButton";
-
 import {
   CodeMirrorEditor,
   type CodeMirrorEditorProps,
@@ -79,9 +77,9 @@ type NativeQueryEditorProps = Omit<CodeMirrorEditorProps, "query"> & {
   isShowingSnippetSidebar?: boolean;
   isShowingTemplateTagsEditor?: boolean;
   modalSnippet?:
-    | NativeQuerySnippet
-    | Partial<Omit<NativeQuerySnippet, "id">>
-    | null;
+  | NativeQuerySnippet
+  | Partial<Omit<NativeQuerySnippet, "id">>
+  | null;
   nativeEditorSelectedText?: string | null;
   onAcceptProposed?: (query: DatasetQuery) => void;
   onBlur?: () => void;
@@ -394,14 +392,6 @@ export const NativeQueryEditor = forwardRef<
                 )}
                 <Flex gap="sm">
                   {extraButton}
-                  {!readOnly && (
-                    <AIQueryButton
-                      onQueryGenerated={(sql) => {
-                        handleChange(sql);
-                        focusEditor();
-                      }}
-                    />
-                  )}
                   {hasRunButton && !readOnly && (
                     <NativeQueryEditorRunButton
                       cancelQuery={cancelQuery}

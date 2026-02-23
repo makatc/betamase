@@ -2,7 +2,9 @@ version: '3.9'
 
 services:
   metabase:
-    image: ghcr.io/makatc/betamase:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.custom
     container_name: metabase
     hostname: metabase
     restart: always

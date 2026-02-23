@@ -1,4 +1,3 @@
-/* eslint-disable */
 import type { MouseEvent } from "react";
 
 import { LogoIcon } from "metabase/common/components/LogoIcon";
@@ -45,17 +44,8 @@ export function AppBarLogo({
       disabled={!isNavBarEnabled}
       data-testid="main-logo-link"
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          fontWeight: "bold",
-          fontSize: "18px",
-          color: "var(--mb-color-brand)",
-        }}
-      >
-        <LogoIcon height={24} />{" "}
-        <span style={{ marginLeft: 8 }}>{}MyDataApp</span>
+      <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '18px', color: 'var(--mb-color-brand)' }}>
+        <LogoIcon height={24} /> <span style={{ marginLeft: 8 }}>MyDataApp</span>
       </div>
     </LogoLink>
   );
