@@ -78,8 +78,8 @@ Los feature flags se controlan via variables de entorno `LW_FEATURE_*` leídas e
 2. **Proxy `/api/ai/*` → middleware**
    - El frontend llama a `/api/ai/generate-sql` relativo a su host (`:3000`)
    - Metabase no sabe redirigir eso al middleware (`:8001`)
-   - Solución: Nginx como proxy O un interceptor en el backend Clojure (ring middleware)
-   - Alternativa sencilla: cambiar el fetch en los componentes React para llamar directamente a `:8001`
+   - **Solución recomendada**: Cambiar el `fetch` en los componentes React (`AIQueryButton.tsx`, `ChatWidget.tsx`, `InsightsPanel.tsx`) para llamar directamente a `http://localhost:8001/api/ai/*` durante dev, o configurar la URL via variable de entorno `REACT_APP_AI_URL`
+   - **Alternativa backend**: Agregar un ring middleware en Clojure que intercepte rutas `/api/ai/*` y las proxee al FastAPI
 
 3. **RLS en PostgreSQL real**
    - Los scripts existen en `database/rls/` pero no se han ejecutado en ninguna BD
