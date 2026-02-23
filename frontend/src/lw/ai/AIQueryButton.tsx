@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { isFeatureEnabled } from '../flags';
+import { isFeatureEnabled, getAIMiddlewareURL } from '../flags';
 
 export const AIQueryButton = ({ onQueryGenerated }: { onQueryGenerated: (sql: string) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +11,8 @@ export const AIQueryButton = ({ onQueryGenerated }: { onQueryGenerated: (sql: st
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/ai/generate-sql', {
+      const aiUrl = getAIMiddlewareURL();
+      const res = await fetch(`${aiUrl}/api/ai/generate-sql`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ natural_language: prompt })
@@ -20,7 +21,7 @@ export const AIQueryButton = ({ onQueryGenerated }: { onQueryGenerated: (sql: st
       onQueryGenerated(data.sql);
       setIsOpen(false);
     } catch (e) {
-      console.error(e);
+      console.error('SQL Generation API error:', e);
       alert('Error generando SQL desde AI.');
     } finally {
       setLoading(false);

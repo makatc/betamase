@@ -95,34 +95,23 @@ cd automation/ai/api && uvicorn main:app --port 8001 --reload
 ## ⚠️ PENDIENTE
 
 ### CRÍTICO — Sin esto los botones AI no aparecen en la UI
-1. **Compilar Metabase con nuestros cambios React**
-   - El dev server local corre con: 
-     ```bash
-     # Terminal 1 — Backend (con flags AI)
-     export LW_FEATURE_AI_SQL_GENERATION=true
-     export LW_FEATURE_AI_CHAT_WIDGET=true
-     export LW_FEATURE_AI_INSIGHTS=true
-     eval "$(mise activate bash)"
-     clojure -M:dev:drivers:drivers-dev:ee:ee-dev:dev-start --hot
-     
-     # Terminal 2 — Frontend
-     bun run build-hot
-     
-     # Terminal 3 — AI Middleware
-     export GEMINI_API_KEY="tu-clave"
-     cd automation/ai/api && uvicorn main:app --port 8001 --reload
-     ```
-   - En el browser: Metabase en `:3000`, frontend hot en `:8080`, AI en `:8001`
 
-2. **Proxy `/api/ai/*` → middleware**
-   - El frontend llama a `/api/ai/generate-sql` relativo a su host (`:3000`)
-   - Metabase no sabe redirigir eso al middleware (`:8001`)
-   - **Solución recomendada**: Cambiar el `fetch` en los componentes React (`AIQueryButton.tsx`, `ChatWidget.tsx`, `InsightsPanel.tsx`) para llamar directamente a `http://localhost:8001/api/ai/*` durante dev, o configurar la URL via variable de entorno `REACT_APP_AI_URL`
-   - **Alternativa backend**: Agregar un ring middleware en Clojure que intercepte rutas `/api/ai/*` y las proxee al FastAPI
+1. ✅ **HECHO** — Proxy `/api/ai/*` → middleware
+   - ✅ Actualizado `frontend/src/lw/flags.ts` con función `getAIMiddlewareURL()`
+   - ✅ Actualizado `ChatWidget.tsx` para usar `http://localhost:8001/api/ai/chat`
+   - ✅ Actualizado `AIQueryButton.tsx` para usar `http://localhost:8001/api/ai/generate-sql`
+   - ✅ Actualizado `InsightsPanel.tsx` para usar `http://localhost:8001/api/ai/insights`
+   - ✅ Soporta variable de entorno `REACT_APP_AI_URL` (default: `http://localhost:8001`)
 
-3. **RLS en PostgreSQL real**
+2. ✅ **HECHO** — FastAPI dependencies
+   - ✅ Agregado `langchain-openai` al requirements.txt
+   - ✅ Creado `automation/ai/api/requirements.txt`
+   - ✅ Actualizado `schema_embeddings.py` para conectar a `localhost:betamase_data` (desarrollo local)
+
+3. **RLS en PostgreSQL real (PRÓXIMO)**
    - Los scripts existen en `database/rls/` pero no se han ejecutado en ninguna BD
-   - Requiere PostgreSQL corriendo con una base de datos de datos reales conectada a Metabase
+   - Requiere PostgreSQL corriendo con una base de datos `betamase_data` conectada a Metabase
+   - Ver sección de comandos SQL abajo
 
 ### MENOR
 - **Gemini rate limits** — En clave de AI Studio free tier hay límite de tokens/minuto. Activar billing en Google Cloud para uso sin restricciones

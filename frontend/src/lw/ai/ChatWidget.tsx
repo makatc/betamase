@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { isFeatureEnabled } from '../flags';
+import { isFeatureEnabled, getAIMiddlewareURL } from '../flags';
 
 export const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +17,8 @@ export const ChatWidget = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/ai/chat', {
+      const aiUrl = getAIMiddlewareURL();
+      const res = await fetch(`${aiUrl}/api/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input })
@@ -25,6 +26,7 @@ export const ChatWidget = () => {
       const data = await res.json();
       setMessages([...newMessages, { role: 'ai', text: data.reply }]);
     } catch (e) {
+      console.error('Chat API error:', e);
       setMessages([...newMessages, { role: 'ai', text: "Error de conexión con el modelo Grok." }]);
     } finally {
       setLoading(false);

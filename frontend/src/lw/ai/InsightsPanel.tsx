@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { isFeatureEnabled } from '../flags';
+import { isFeatureEnabled, getAIMiddlewareURL } from '../flags';
 
 export const InsightsPanel = ({ dashboardId, chartData }: { dashboardId: number, chartData: any }) => {
   const [insight, setInsight] = useState<string | null>(null);
@@ -8,14 +8,15 @@ export const InsightsPanel = ({ dashboardId, chartData }: { dashboardId: number,
     if (!isFeatureEnabled('AI_INSIGHTS')) return;
     if (!chartData) return;
 
-    fetch('/api/ai/insights', {
+    const aiUrl = getAIMiddlewareURL();
+    fetch(`${aiUrl}/api/ai/insights`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ dashboard_id: dashboardId, data_json: JSON.stringify(chartData).substring(0, 1000) })
     })
       .then(r => r.json())
       .then(data => setInsight(data.text))
-      .catch(console.error);
+      .catch(e => console.error('Insights API error:', e));
 
   }, [dashboardId, chartData]);
 
