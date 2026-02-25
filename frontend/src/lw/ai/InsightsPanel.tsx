@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { isFeatureEnabled, getAIMiddlewareURL } from '../flags';
+import { getAIMiddlewareURL } from '../flags';
 
 export const InsightsPanel = ({ dashboardId, chartData }: { dashboardId: number, chartData: any }) => {
   const [insight, setInsight] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isFeatureEnabled('AI_INSIGHTS')) return;
     if (!chartData) return;
 
     const aiUrl = getAIMiddlewareURL();

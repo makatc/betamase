@@ -1,8 +1,12 @@
 /**
  * Custom lw layer configuration
- * This file manages feature flags and AI middleware URL
- * Feature flags: LW_FEATURE_X environment variables
- * AI URL: REACT_APP_AI_URL (defaults to localhost:8001 for development)
+ * Feature flags leídos de process.env (embebidos por rspack en build time).
+ *
+ * Para activar: pasar las vars al proceso de build:
+ *   LW_FEATURE_AI_CHAT_WIDGET=true bun run build-hot
+ *
+ * Para cambiar la URL del middleware AI:
+ *   REACT_APP_AI_URL=http://mi-servidor:8001 bun run build-hot
  */
 
 export const isFeatureEnabled = (flagName: string): boolean => {
@@ -12,8 +16,8 @@ export const isFeatureEnabled = (flagName: string): boolean => {
 
 /**
  * Get the AI Middleware base URL
- * In development: http://localhost:8001 (default)
- * In production: Configure via REACT_APP_AI_URL env var
+ * Default: http://localhost:8001
+ * Override: REACT_APP_AI_URL env var al momento del build
  */
 export const getAIMiddlewareURL = (): string => {
   return process.env.REACT_APP_AI_URL || "http://localhost:8001";

@@ -14,6 +14,8 @@ import NewItemButton from "../NewItemButton";
 import { SearchBar } from "../search/SearchBar";
 import { SearchButton } from "../search/SearchButton/SearchButton";
 
+import { AIBarButton } from "../../../../lw/ai/AIBarButton";
+
 import { AppBarInfoContainer, AppBarRoot } from "./AppBarLarge.styled";
 import { AppBarLogo } from "./AppBarLogo";
 import { AppBarToggle } from "./AppBarToggle";
@@ -106,6 +108,7 @@ const AppBarLarge = ({
             (isEmbeddingIframe ? <SearchBar /> : <SearchButton mr="md" />)}
           {isNewButtonVisible && <NewItemButton collectionId={collectionId} />}
           {!isEmbeddingIframe && <PLUGIN_METABOT.MetabotAppBarButton />}
+          {!isEmbeddingIframe && <AIBarButton />}
           {isAppSwitcherVisible && (
             <Box c="text-primary" aria-label={t`Settings menu`}>
               <AppSwitcher />

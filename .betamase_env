@@ -1,0 +1,10 @@
+# Crear el archivo en tu home                                                                                                                      
+  cat > ~/.betamase_env << 'EOF'                                                                                                                   
+  GEMINI_API_KEY="AIzaSyCfxnAsV9Wiu27tFptlOftMNyrDJ2_6NRQ"                                                                                                                   
+  DATABASE_URL="postgres://avnadmin:YOUR_DB_SECRET@pg-basemetal-makatc-9778.c.aivencloud.com:17104/defaultdb?sslmode=require"                                                                                                                 
+  GROK_API_KEY="tu_grok_key_aqui"
+  LW_FEATURE_AI_SQL_GENERATION=true
+  LW_FEATURE_AI_CHAT_WIDGET=true
+  LW_FEATURE_AI_INSIGHTS=true
+  EOF
+

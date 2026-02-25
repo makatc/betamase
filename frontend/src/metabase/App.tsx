@@ -38,7 +38,8 @@ import ErrorBoundary from "./ErrorBoundary";
 import { useTokenRefresh } from "./api/utils/use-token-refresh";
 import { NewModals } from "./new/components/NewModals/NewModals";
 import { Palette } from "./palette/components/Palette";
-import { ChatWidget } from "../lw/ai/ChatWidget";
+import { AICopilotProvider } from "../lw/ai/AICopilotContext";
+import { AICopilotPanel } from "../lw/ai/AICopilotPanel";
 
 const getErrorComponent = ({ status, data, context }: AppErrorDescriptor) => {
   if (status === 403 || data?.error_code === "unauthorized") {
@@ -114,27 +115,29 @@ function App({
     <ErrorBoundary onError={onError}>
       <ScrollToTop>
         <KBarProvider>
-          <KeyboardTriggeredErrorModal />
-          <AppContainer className={CS.spread}>
-            <AppBanner />
-            {isAppBarVisible && <AppBar />}
-            <AppContentContainer isAdminApp={isAdminApp}>
-              {isNavBarEnabled && <Navbar />}
-              <AppContent ref={setViewportElement}>
-                <ContentViewportContext.Provider
-                  value={viewportElement ?? null}
-                >
-                  {errorPage ? getErrorComponent(errorPage) : children}
-                </ContentViewportContext.Provider>
-              </AppContent>
-              <UndoListing />
-              <StatusListing />
-              <NewModals />
-              <PLUGIN_METABOT.Metabot hide={isAdminApp || isDataStudioApp} />
-            </AppContentContainer>
-          </AppContainer>
-          <Palette />
-          <ChatWidget />
+          <AICopilotProvider>
+            <KeyboardTriggeredErrorModal />
+            <AppContainer className={CS.spread}>
+              <AppBanner />
+              {isAppBarVisible && <AppBar />}
+              <AppContentContainer isAdminApp={isAdminApp}>
+                {isNavBarEnabled && <Navbar />}
+                <AppContent ref={setViewportElement}>
+                  <ContentViewportContext.Provider
+                    value={viewportElement ?? null}
+                  >
+                    {errorPage ? getErrorComponent(errorPage) : children}
+                  </ContentViewportContext.Provider>
+                </AppContent>
+                <UndoListing />
+                <StatusListing />
+                <NewModals />
+                <PLUGIN_METABOT.Metabot hide={isAdminApp || isDataStudioApp} />
+              </AppContentContainer>
+            </AppContainer>
+            <Palette />
+            <AICopilotPanel />
+          </AICopilotProvider>
         </KBarProvider>
       </ScrollToTop>
     </ErrorBoundary>

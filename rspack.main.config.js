@@ -277,6 +277,11 @@ const config = {
       WEBPACK_BUNDLE: "development",
       MB_LOG_ANALYTICS: "false",
       ENABLE_CLJS_HOT_RELOAD: process.env.ENABLE_CLJS_HOT_RELOAD ?? "false",
+      // lw custom feature flags (default: "false", override al hacer build)
+      LW_FEATURE_AI_CHAT_WIDGET: process.env.LW_FEATURE_AI_CHAT_WIDGET ?? "false",
+      LW_FEATURE_AI_SQL_GENERATION: process.env.LW_FEATURE_AI_SQL_GENERATION ?? "false",
+      LW_FEATURE_AI_INSIGHTS: process.env.LW_FEATURE_AI_INSIGHTS ?? "false",
+      REACT_APP_AI_URL: process.env.REACT_APP_AI_URL ?? "http://localhost:8001",
     }),
   ],
 };

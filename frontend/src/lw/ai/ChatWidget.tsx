@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { isFeatureEnabled, getAIMiddlewareURL } from '../flags';
+import { getAIMiddlewareURL } from '../flags';
 
 export const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: string, text: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-
-  if (!isFeatureEnabled('AI_CHAT_WIDGET')) return null;
 
   const handleSend = async () => {
     if (!input.trim()) return;

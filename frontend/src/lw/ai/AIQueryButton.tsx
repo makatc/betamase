@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { isFeatureEnabled, getAIMiddlewareURL } from '../flags';
+import { getAIMiddlewareURL } from '../flags';
 
 export const AIQueryButton = ({ onQueryGenerated }: { onQueryGenerated: (sql: string) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-
-  if (!isFeatureEnabled('AI_SQL_GENERATION')) return null;
 
   const handleGenerate = async () => {
     setLoading(true);
