@@ -9,7 +9,7 @@ ARG VERSION
 
 WORKDIR /home/node
 
-RUN apt-get update && apt-get upgrade -y && apt-get install wget apt-transport-https gpg curl git -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install wget apt-transport-https gpg curl git build-essential python3 -y \
     && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null \
     && echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list \
     && apt-get update \
@@ -26,10 +26,13 @@ RUN git config --global --add safe.directory /home/node
 # install bun for frontend dependencies
 RUN npm install -g bun
 
-# install frontend dependencies
-RUN bun install --frozen-lockfile
+# Optimizar memoria para la compilación de JS
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-RUN INTERACTIVE=false CI=true MB_EDITION=$MB_EDITION bin/build.sh :version ${VERSION}
+# install frontend dependencies - avoid frozen-lockfile if it fails in custom builds
+RUN bun install
+
+RUN INTERACTIVE=false CI=true MB_EDITION=$MB_EDITION bin/build.sh :version "${VERSION:-v0.48.0-custom}"
 
 # ###################
 # # STAGE 2: runner
