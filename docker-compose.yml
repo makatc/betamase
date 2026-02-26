@@ -19,8 +19,7 @@ services:
     restart: always
 
   ai-middleware:
-    build:
-      context: ./automation/ai/api
+    image: ghcr.io/makatc/betamase-ai:latest
     ports:
       - "8001:8001"
     environment:
