@@ -2,37 +2,53 @@
 # STAGE 1: builder
 ###################
 
-FROM node:22-bullseye AS builder
+FROM ubuntu:22.04 AS builder
 
 ARG MB_EDITION=oss
-ARG VERSION
+ARG VERSION=v0.48.0-custom
 
-WORKDIR /home/node
+ENV DEBIAN_FRONTEND=noninteractive
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV JAVA_HOME=/usr/lib/jvm/temurin-21
+ENV PATH="$JAVA_HOME/bin:/usr/local/bin:$PATH"
 
-RUN apt-get update && apt-get upgrade -y && apt-get install wget apt-transport-https gpg curl git build-essential python3 -y \
-    && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null \
-    && echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list \
-    && apt-get update \
-    && apt install temurin-21-jdk -y \
-    && curl -O https://download.clojure.org/install/linux-install-1.12.0.1488.sh \
+WORKDIR /app
+
+# 1) Instalar dependencias del sistema: Java 21 (Temurin), Node 22, git, curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget curl git gpg apt-transport-https ca-certificates \
+    build-essential python3 rlwrap \
+    && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public \
+    | gpg --dearmor -o /etc/apt/trusted.gpg.d/adoptium.gpg \
+    && echo "deb https://packages.adoptium.net/artifactory/deb $(. /etc/os-release; echo $VERSION_CODENAME) main" \
+    > /etc/apt/sources.list.d/adoptium.list \
+    && apt-get update && apt-get install -y temurin-21-jdk \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2) Instalar Clojure CLI (instala en /usr/local/bin/clojure)
+RUN curl -L -O https://download.clojure.org/install/linux-install-1.12.0.1488.sh \
     && chmod +x linux-install-1.12.0.1488.sh \
-    && ./linux-install-1.12.0.1488.sh
+    && ./linux-install-1.12.0.1488.sh \
+    && rm linux-install-1.12.0.1488.sh \
+    && clojure --version
 
-COPY . .
-
-# version is pulled from git, but git doesn't trust the directory due to different owners
-RUN git config --global --add safe.directory /home/node
-
-# install bun for frontend dependencies
+# 3) Instalar bun
 RUN npm install -g bun
 
-# Optimizar memoria para la compilación de JS
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# 4) Copiar fuentes
+COPY . .
 
-# install frontend dependencies - avoid frozen-lockfile if it fails in custom builds
+# 5) Git safe dir (necesario porque el Dockerfile corre como root)
+RUN git config --global --add safe.directory /app
+
+# 6) Instalar dependencias JS
 RUN bun install
 
-RUN INTERACTIVE=false CI=true MB_EDITION=$MB_EDITION bin/build.sh :version "${VERSION:-v0.48.0-custom}"
+# 7) Compilar todo (Frontend + Backend JAR)
+RUN INTERACTIVE=false CI=true MB_EDITION=$MB_EDITION \
+    bin/build.sh :version "$VERSION"
 
 # ###################
 # # STAGE 2: runner
@@ -57,7 +73,7 @@ RUN apk add -U bash fontconfig curl font-noto font-noto-arabic font-noto-hebrew 
     mkdir -p /plugins && chmod a+rwx /plugins
 
 # add Metabase script and uberjar
-COPY --from=builder /home/node/target/uberjar/metabase.jar /app/
+COPY --from=builder /app/target/uberjar/metabase.jar /app/
 COPY bin/docker/run_metabase.sh /app/
 
 # expose our default runtime port
