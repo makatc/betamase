@@ -1,5 +1,4 @@
 #!/bin/bash
-export GEMINI_API_KEY="AIzaSyCfxnAsV9Wiu27tFptlOftMNyrDJ2_6NRQ"
 source ~/.betamase_secrets
 eval "$(/home/makatc/.local/bin/mise activate bash)"
 cd /home/makatc/PROYECTOS/betamase/automation/ai/api
