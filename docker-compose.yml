@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  metabase:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - MB_DB_TYPE=postgres
+      - MB_DB_HOST=${MB_DB_HOST}
+      - MB_DB_PORT=${MB_DB_PORT}
+      - MB_DB_DBNAME=${MB_DB_DBNAME}
+      - MB_DB_USER=${MB_DB_USER}
+      - MB_DB_PASS=${MB_DB_PASS}
+      - MB_DB_CONNECTION_URI=${MB_DB_CONNECTION_URI}
+      - LW_FEATURE_AI_SQL_GENERATION=true
+      - LW_FEATURE_AI_CHAT_WIDGET=true
+      - LW_FEATURE_AI_INSIGHTS=true
+    restart: always
+
+  ai-middleware:
+    build:
+      context: ./automation/ai/api
+    ports:
+      - "8001:8001"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+    restart: always
