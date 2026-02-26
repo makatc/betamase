@@ -34,10 +34,16 @@ RUN curl -L -O https://download.clojure.org/install/linux-install-1.12.0.1488.sh
     && rm linux-install-1.12.0.1488.sh \
     && clojure --version
 
-# 3) Instalar bun
+# 3) Instalar pip y uv (necesario para las dependencias Python del build)
+RUN apt-get update && apt-get install -y --no-install-recommends python3-pip \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install uv \
+    && uv --version
+
+# 5) Instalar bun
 RUN npm install -g bun
 
-# 4) Copiar fuentes
+# 6) Copiar fuentes
 COPY . .
 
 # 5) Git safe dir (necesario porque el Dockerfile corre como root)
