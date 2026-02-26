@@ -6,7 +6,7 @@ export MB_DB_HOST=pg-basemetal-makatc-9778.c.aivencloud.com
 export MB_DB_PORT=17104
 export MB_DB_DBNAME=defaultdb
 export MB_DB_USER=avnadmin
-export MB_DB_PASS=YOUR_DB_SECRET
+source ~/.betamase_secrets
 export MB_DB_CONNECTION_URI="jdbc:postgresql://pg-basemetal-makatc-9778.c.aivencloud.com:17104/defaultdb?sslmode=require"
 export LW_FEATURE_AI_SQL_GENERATION=true
 export LW_FEATURE_AI_CHAT_WIDGET=true

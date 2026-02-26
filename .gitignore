@@ -171,3 +171,5 @@ CLAUDE.local.md
 /resources/python-sources/sqlglot-*.dist-info/
 __pycache__/
 
+.betamase_secrets
+*.secrets*
