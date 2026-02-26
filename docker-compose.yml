@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   metabase:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/makatc/betamase:latest
     ports:
       - "3000:3000"
     environment:
